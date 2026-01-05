@@ -1,6 +1,6 @@
 #  Import necessary libraries 
 import streamlit as st
-import backend as sc  # Assumes your backend code is in 'backend.py'
+import backend as sc
 import os
 
 
