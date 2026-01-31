@@ -1,5 +1,8 @@
 # --- Import necessary libraries ---
 import streamlit as st
+import queries
+from st_supabase_connection import SupabaseConnection
+
 
 class WinningNumbers:
     """A class to calculate winning numbers"""
@@ -8,6 +11,7 @@ class WinningNumbers:
         """Initialize the class with lottery ID and the user's numbers."""
         self._lottery_id = _lottery_id
         self._input_numbers = _input_numbers
+
         try:
             self._match_count = st.session_state[f"matches_{_lottery_id}"]
         except KeyError:
@@ -39,7 +43,7 @@ class WinningNumbers:
 
         except TypeError:
             print("Invalid lottery ID type. Cannot convert to string.")
-            return None # Invalid
+            return None  # Invalid
 
     def _check_validity_match_count(self):
         """
@@ -48,7 +52,7 @@ class WinningNumbers:
         """
         try:
             # 1. Get the rules for the current lottery
-            rules = {'hu5': [1,2,3,4,5], 'hu6': [1,2,3,4,5,6], 'hu7': [1,2,3,4,5,6,7]}
+            rules = {'hu5': [1, 2, 3, 4, 5], 'hu6': [1, 2, 3, 4, 5, 6], 'hu7': [1, 2, 3, 4, 5, 6, 7]}
 
             # 2. Get the match range
             match_range = rules[self._lottery_id]
@@ -127,7 +131,7 @@ class WinningNumbers:
         try:
             # 1. Initialize the connection.
             # This uses secrets.toml by default.
-            conn = st.connection("postgresql", type="sql")
+            conn = st.connection("supa_db", type="sql")
 
             # 2. First query: find all matching draws
             # conn.query() returns a Pandas DataFrame.
@@ -162,17 +166,17 @@ class WinningNumbers:
         # Step 1: Validate the lottery ID
         lottery = self._check_validity_lottery()
         if not lottery:
-            return  formatted_results, total_draws, winning_draws  # Invalid lottery_id, return empty results
+            return formatted_results, total_draws, winning_draws  # Invalid lottery_id, return empty results
 
         # Step 2: Validate the user's numbers
         numbers = self._check_validity_numbers()
         if not numbers:
-            return  formatted_results, total_draws, winning_draws  # Invalid numbers, return empty results
+            return formatted_results, total_draws, winning_draws  # Invalid numbers, return empty results
 
         # Step 3: Validate the user's match count
         match_count = self._check_validity_match_count()
         if not match_count:
-            return  formatted_results, total_draws, winning_draws  # Invalid match count, return empty results
+            return formatted_results, total_draws, winning_draws  # Invalid match count, return empty results
 
         # Initialize variables
         formatted_results = []
@@ -180,49 +184,8 @@ class WinningNumbers:
 
         # --- Logic for 'hu7' (which has two sets of numbers) ---
         if self._lottery_id == 'hu7':
-            self.query_matches = """
-                        SELECT
-                            sub_a.draw_date,
-                            sub_a.numbers,
-                            sub_a.match_count AS match_count_a,
-                            sub_b.numbers,
-                            sub_b.match_count AS match_count_b,
-                            COUNT(*) OVER () AS total_count 
-                        FROM
-                            (
-                                SELECT
-                                    draw_date, numbers,
-                                    CARDINALITY(ARRAY(
-                                        SELECT UNNEST(numbers)
-                                        INTERSECT
-                                        SELECT UNNEST(:numbers_a) -- This is numbers_set_a
-                                    )) AS match_count
-                                FROM draw
-                                WHERE lottery_id = :id_a -- This is lottery_id 'hu7a'
-                            ) AS sub_a
-
-                        INNER JOIN
-                            (
-                                SELECT
-                                    draw_date, numbers,
-                                    CARDINALITY(ARRAY(
-                                        SELECT UNNEST(numbers)
-                                        INTERSECT
-                                        SELECT UNNEST(:numbers_b) -- This is numbers_set_b
-                                    )) AS match_count
-                                FROM draw
-                                WHERE lottery_id = :id_b -- This is lottery_id 'hu7b'
-                            ) AS sub_b
-                        ON
-                            sub_a.draw_date = sub_b.draw_date
-                        WHERE
-                            sub_b.match_count = :match_count OR
-                            sub_a.match_count = :match_count
-                        ORDER BY
-                            sub_a.draw_date DESC
-                        LIMIT 20;
-                            """
-            self.query_total = "SELECT COUNT(*) FROM draw WHERE lottery_id = :id;"
+            self.query_matches = queries.MATCHES_HU7
+            self.query_total = queries.MATCHES_TOTAL
 
             match_params = {
                 "numbers_a": numbers,
@@ -242,28 +205,12 @@ class WinningNumbers:
             formatted_results = [(row[0].strftime("%Y-%m-%d"), row[1], row[2], row[3], row[4]) for row in
                                  raw_results]
 
-
             winning_draws = raw_results[0][-1] if raw_results else 0
 
         # --- Logic for 'hu5' or 'hu6' (which have one set of numbers) ---
         elif self._lottery_id == 'hu5' or self._lottery_id == 'hu6':
-            self.query_matches = """
-            SELECT *, COUNT(*) OVER () AS total_count 
-            FROM (
-                SELECT draw_date, numbers,
-                       CARDINALITY(ARRAY(
-                           SELECT UNNEST(numbers)
-                           INTERSECT
-                           SELECT UNNEST(:number)
-                       )) AS match_count
-                FROM draw
-                WHERE lottery_id = :id
-            ) AS sub
-            WHERE match_count = :match_count
-            ORDER BY draw_date DESC
-            LIMIT 20;
-            """
-            self.query_total = "SELECT COUNT(*) FROM draw WHERE lottery_id = :id;"
+            self.query_matches = queries.MATCHES_HU5_HU6
+            self.query_total = queries.MATCHES_TOTAL
 
             match_params = {"number": numbers, "id": lottery, 'match_count': match_count}
             total_params = {"id": lottery}
@@ -280,3 +227,16 @@ class WinningNumbers:
 
         # Return the final formatted results and the total draw count
         return formatted_results, total_draws, winning_draws
+
+
+def get_pdf(document):
+    """
+    Connects to Supabase Storage and retrieves PDF bytes.
+    """
+    # Initialize the storage connection
+    conn = st.connection("supabase", type=SupabaseConnection)
+
+    # Download from the 'Documents' bucket
+    _, _, content = conn.download(bucket_id="Documents", source_path=document)
+
+    return content

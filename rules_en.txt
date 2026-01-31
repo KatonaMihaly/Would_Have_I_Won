@@ -6,8 +6,6 @@ Finally, press the **"Submit"** button to display the historical data.
 If there are no listed results and the app displays
 *"You would have won in 0 draws out of 0 draws since the start of the lottery!"*,
 then an error occurred during data retrieval. Please refresh the application.
-If this doesn’t solve the issue, contact the developer at:
-📧 **katona.mihaly@outlook.hu**
 
 If the number of draws is not zero but the list is empty, it means your selected numbers have never matched in any draw up to the current database update.
 

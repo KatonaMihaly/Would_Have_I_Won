@@ -6,8 +6,6 @@ Végül nyomd meg a **„Lássuk”** gombot, hogy az alkalmazás kilistázza a 
 Ha nem jelennek meg eredmények, és az applikáció ezt írja:
 *"Az eddigi *0* húzásból *0* húzáson lett volna találatod!"*,
 akkor hiba történt a lekérés során. Frissítsd az alkalmazást.
-Ha ez sem oldja meg a problémát, vedd fel a kapcsolatot a fejlesztővel:
-📧 **katona.mihaly@outlook.hu**
 
 Ha a húzások száma nem nulla, de a lista üres, akkor a megadott számsor eddig **soha nem ért el találatot** az adatbázis frissítéséig.
 

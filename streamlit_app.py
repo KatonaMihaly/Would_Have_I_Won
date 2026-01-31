@@ -4,6 +4,7 @@ import backend as sc
 import os
 
 
+
 class StreamlitFrontend:
     """
     Main class for the Streamlit application.
@@ -18,9 +19,14 @@ class StreamlitFrontend:
             "welcome_activity": "🎯 Check how many times you would have won the hungarian lottery!",
             "welcome_goals": "🍀 Submit your lucky numbers and check how many times you would have won the lottery if"
                              " you had played every game since the beginning of the lottery!",
-            "disclaimer_title": "⚠️ User agreement",
-            "disclaimer_file": "disclaimer_en.txt",
-            "accept_button": "✅ I Accept",
+            "disclaimer_title": "⚠️ User agreement and Data Policy",
+            "disclaimer_text": """I confirm that I have read the User Agreement and Data Policy documents
+                               and agree to the terms of the service.""",
+            "user_agreement": "User Agreement",
+            "data_policy": "Data Policy",
+            "user_agreement_doc": "agreement_en.pdf",
+            "data_policy_doc": "policy_en.pdf",
+            "accept_button": "✅ Next",
             "back_button": "⬅️ Back",
             "selector_title": "Choose the type of lottery!",
             "rules_title": "📜 Rules and guide",
@@ -51,8 +57,13 @@ class StreamlitFrontend:
             "welcome_goals": "🍀 Add meg a nyerőszámaid, és tudd meg, hányszor nyertél volna a lottón, ha a lottó"
                              " kezdete óta minden húzáson részt vettél volna!",
             "disclaimer_title": "⚠️ Felhasználási Feltételek és Adatkezelési Tájékoztató",
-            "disclaimer_file": "disclaimer_hu.txt",
-            "accept_button": "✅ Elfogadom",
+            "disclaimer_text": """Megerősítem, hogy elolvastam a Felhasználási Feltételek és Adatkezelési Tájékoztató
+                               dokumentumokat, és elfogadom a szolgáltatás feltételeit.""",
+            "user_agreement": "Felhasználási Feltételek",
+            "data_policy": "Adatkezelési Tájékoztató",
+            "user_agreement_doc": "agreement_hu.pdf",
+            "data_policy_doc": "policy_hu.pdf",
+            "accept_button": "✅ Tovább",
             "back_button": "⬅️ Vissza",
             "selector_title": "🎰 Válaszd ki a lottó típusát!",
             "selector_matches": "🎯 Válaszd ki a találatok számát!",
@@ -130,43 +141,67 @@ class StreamlitFrontend:
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("Magyar", use_container_width=True, type="secondary"):
+            if st.button("Magyar", width='stretch', type="secondary"):
                 st.session_state["language"] = "hu"
                 st.rerun()
-            st.image("hu.png", use_container_width=True)
+            st.image("hu.png", width='stretch')
 
         with col2:
-            if st.button("English", use_container_width=True, type="secondary"):
+            if st.button("English", width='stretch', type="secondary"):
                 st.session_state["language"] = "en"
                 st.rerun()
-            st.image("en.png", use_container_width=True)
-
-        # col1, col2 = st.columns(2)
-        # with col1:
-        #     st.title(self.TEXT["hu"]["welcome_goals"])
-        # with col2:
-        #     st.title(self.TEXT["en"]["welcome_goals"])
+            st.image("en.png", width='stretch')
 
     def _disclaimer_page(self, txt):
-        """
-        Display disclaimer that must be accepted.
-        """
+
+        # Initialize session state for UI toggles and PDF memory caching
+        if "pdf_cache" not in st.session_state:
+            st.session_state.pdf_cache = {"agreement": None, "policy": None}
+        if "show_docs" not in st.session_state:
+            st.session_state.show_docs = {"agreement": False, "policy": False}
+
         st.set_page_config(page_title='Would I have won?', page_icon="🎲", layout="wide")
         st.title(txt["disclaimer_title"])
 
-        # Sanity check: Try to read the disclaimer file.
-        try:
-            with open(txt["disclaimer_file"], 'r', encoding='utf-8') as file:
-                st.write(file.read())
-        except FileNotFoundError:
-            st.error(f"Error: Disclaimer file not found at '{os.path.abspath(txt['disclaimer_file'])}'.")
-            # Still show buttons so user can go back.
-        except Exception as e:
-            st.error(f"An error occurred while reading the file: {e}")
+        col1, col2 = st.columns(2)
 
-        if st.button(txt["accept_button"], type="secondary"):
-            st.session_state["disclaimer_accepted"] = True
-            st.rerun()
+        with col1:
+            if st.button(txt["user_agreement"], use_container_width=True):
+                if st.session_state.show_docs["policy"]:
+                    st.session_state.show_docs["policy"] = not st.session_state.show_docs["policy"]
+                st.session_state.show_docs["agreement"] = not st.session_state.show_docs["agreement"]
+
+                # Request handled by the backend
+                if st.session_state.show_docs["agreement"] and not st.session_state.pdf_cache["agreement"]:
+                    with st.spinner("Fetching..."):
+                        st.session_state.pdf_cache["agreement"] = sc.get_pdf(txt["user_agreement_doc"])
+
+        with col2:
+            if st.button(txt["data_policy"], use_container_width=True):
+                if st.session_state.show_docs["agreement"]:
+                    st.session_state.show_docs["agreement"] = not st.session_state.show_docs["agreement"]
+                st.session_state.show_docs["policy"] = not st.session_state.show_docs["policy"]
+
+                # Request handled by the backend
+                if st.session_state.show_docs["policy"] and not st.session_state.pdf_cache["policy"]:
+                    with st.spinner("Fetching..."):
+                        st.session_state.pdf_cache["policy"] = sc.get_pdf(txt["data_policy_doc"])
+
+        # Render the content if toggle is active
+        if st.session_state.show_docs["agreement"]:
+            st.pdf(st.session_state.pdf_cache["agreement"], height=700)
+
+        if st.session_state.show_docs["policy"]:
+            st.pdf(st.session_state.pdf_cache["policy"], height=700)
+
+        st.divider()
+
+        agreed = st.checkbox(txt["disclaimer_text"])
+
+        if agreed:
+            if st.button(txt["accept_button"], type="secondary"):
+                st.session_state["disclaimer_accepted"] = True
+                st.rerun()
 
         st.button(txt["back_button"], on_click=self._clear_session_keys, args=(['language'],))
 
@@ -186,17 +221,17 @@ class StreamlitFrontend:
             return "primary" if st.session_state["lottery_id"] == lottery_id else "secondary"
 
         with col1:
-            if st.button("Ötöslottó", use_container_width=True, type=get_button_type("hu5")):
+            if st.button("Ötöslottó", width='stretch', type=get_button_type("hu5")):
                 st.session_state["lottery_id"] = "hu5"
                 st.rerun()
 
         with col2:
-            if st.button("Hatoslottó", use_container_width=True, type=get_button_type("hu6")):
+            if st.button("Hatoslottó", width='stretch', type=get_button_type("hu6")):
                 st.session_state["lottery_id"] = "hu6"
                 st.rerun()
 
         with col3:
-            if st.button("Skandináv lottó", use_container_width=True, type=get_button_type("hu7")):
+            if st.button("Skandináv lottó", width='stretch', type=get_button_type("hu7")):
                 st.session_state["lottery_id"] = "hu7"
                 st.rerun()
 
@@ -209,10 +244,10 @@ class StreamlitFrontend:
                 "selected_numbers_hu5", "selected_numbers_hu6", "selected_numbers_hu7",
                 "get_winning_numbers",
             ]
-            st.button(txt["back_button"], on_click=self._clear_session_keys, use_container_width=True, args=(back_keys,))
+            st.button(txt["back_button"], on_click=self._clear_session_keys, width='stretch', args=(back_keys,))
 
         with col5:
-            if st.button(txt["rules_title"], use_container_width=True, type=get_button_type("rules")):
+            if st.button(txt["rules_title"], width='stretch', type=get_button_type("rules")):
                 st.session_state["rules"] = True
                 st.rerun()
 
@@ -291,7 +326,7 @@ class StreamlitFrontend:
                 selected = (j == st.session_state[matches_key])
                 btn_type = "primary" if selected else "secondary"
 
-                if st.button(str(j), key=f"match_{_lottery_id}_{j}", use_container_width=True, type=btn_type):
+                if st.button(str(j), key=f"match_{_lottery_id}_{j}", width='stretch', type=btn_type):
                     set_matches(j)
                     st.rerun()
 
@@ -315,7 +350,7 @@ class StreamlitFrontend:
                 selected = i in st.session_state[session_key]
                 btn_type = "primary" if selected else "secondary"
 
-                if st.button(str(i), key=f"num_{_lottery_id}_{i}", use_container_width=True, type=btn_type):
+                if st.button(str(i), key=f"num_{_lottery_id}_{i}", width='stretch', type=btn_type):
                     toggle_number(i, limit)
                     st.rerun()
 
@@ -325,7 +360,7 @@ class StreamlitFrontend:
 
         #  Dynamic Submit Button
         is_disabled = len(st.session_state[session_key]) != limit
-        if st.button(txt["submit_button"], type="primary", use_container_width=True, disabled=is_disabled):
+        if st.button(txt["submit_button"], type="primary", width='stretch', disabled=is_disabled):
             st.session_state.get_winning_numbers = True
             st.rerun()
 

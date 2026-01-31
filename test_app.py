@@ -41,17 +41,15 @@ def app_server():
         proc.kill()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def driver():
-    """Fixture to set up and tear down the Selenium WebDriver."""
     options = EdgeOptions()
     options.use_chromium = True
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu") # Helpful for PDF rendering issues
 
-    # --- Hardcoded driver for local run without internet connection for a driver manager ---
     service = EdgeService(executable_path=r"msedgedriver.exe")
-
     driver_instance = webdriver.Edge(service=service, options=options)
     yield driver_instance
     driver_instance.quit()
@@ -61,12 +59,12 @@ def driver():
 # Each tuple contains the parameters for one full test run.
 test_cases = [
     # (test_id, lang_btn, accept_btn, lottery_btn, num_clicks, submit_btn, result_header, success_msg_part)
-    ('hu5_en', 'English', '✅ I Accept', 'Ötöslottó', 5, 'Submit', '🎰 Lottery Results', 'You would have won'),
-    ('hu6_en', 'English', '✅ I Accept', 'Hatoslottó', 6, 'Submit', '🎰 Lottery Results', 'You would have won'),
-    ('hu7_en', 'English', '✅ I Accept', 'Skandináv lottó', 7, 'Submit', '🎰 Lottery Results', 'You would have won'),
-    ('hu5_hu', 'Magyar', '✅ Elfogadom', 'Ötöslottó', 5, 'Lássuk!', '🎰 Eredmények', 'lett volna találatod! 🎉'),
-    ('hu6_hu', 'Magyar', '✅ Elfogadom', 'Hatoslottó', 6, 'Lássuk!', '🎰 Eredmények', 'lett volna találatod! 🎉'),
-    ('hu7_hu', 'Magyar', '✅ Elfogadom', 'Skandináv lottó', 7, 'Lássuk!', '🎰 Eredmények', 'lett volna találatod! 🎉'),
+    ('hu5_en', 'English', '✅ Next', 'Ötöslottó', 5, 'Submit', '🎰 Lottery Results', 'You would have won'),
+    ('hu6_en', 'English', '✅ Next', 'Hatoslottó', 6, 'Submit', '🎰 Lottery Results', 'You would have won'),
+    ('hu7_en', 'English', '✅ Next', 'Skandináv lottó', 7, 'Submit', '🎰 Lottery Results', 'You would have won'),
+    ('hu5_hu', 'Magyar', '✅ Tovább', 'Ötöslottó', 5, 'Lássuk!', '🎰 Eredmények', 'lett volna találatod! 🎉'),
+    ('hu6_hu', 'Magyar', '✅ Tovább', 'Hatoslottó', 6, 'Lássuk!', '🎰 Eredmények', 'lett volna találatod! 🎉'),
+    ('hu7_hu', 'Magyar', '✅ Tovább', 'Skandináv lottó', 7, 'Lássuk!', '🎰 Eredmények', 'lett volna találatod! 🎉'),
 ]
 
 @pytest.mark.parametrize(
@@ -95,9 +93,50 @@ def test_full_user_journey(
             EC.element_to_be_clickable((By.XPATH, f"//button//*[text()='{lang_btn}']"))
         )
         lang_button.click()
+        time.sleep(1)
 
         # --- 2. Disclaimer Page ---
-        # Wait for the 'I Accept' button to appear and click it
+        # We need to click the correct buttons based on the language (lang_btn)
+        # For this example, I'll trigger the Agreement toggle
+        agreement_text = "User Agreement" if lang_btn == "English" else "Felhasználási Feltételek"
+
+        ua_button = wait.until(
+            EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{agreement_text}')]"))
+        )
+        ua_button.click()
+        time.sleep(2)
+
+        ua_button = wait.until(
+            EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{agreement_text}')]"))
+        )
+        ua_button.click()
+
+        policy_text = "Data Policy" if lang_btn == "English" else "Adatkezelési Tájékoztató"
+
+        dp_button = wait.until(
+            EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{policy_text}')]"))
+        )
+        dp_button.click()
+        time.sleep(2)
+
+        dp_button = wait.until(
+            EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{policy_text}')]"))
+        )
+        dp_button.click()
+
+        # --- Checkbox Handling ---
+        checkbox_container = wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="stCheckbox"]'))
+        )
+
+        # Click the label (visual element) to avoid 'ElementNotInteractable'
+        checkbox_label = checkbox_container.find_element(By.TAG_NAME, "label")
+        checkbox_input = checkbox_container.find_element(By.TAG_NAME, "input")
+
+        if not checkbox_input.is_selected():
+            checkbox_label.click()
+
+        # Click Next/Tovább
         accept_button = wait.until(
             EC.element_to_be_clickable((By.XPATH, f"//button//*[text()='{accept_btn}']"))
         )
@@ -119,7 +158,7 @@ def test_full_user_journey(
         # Click on the required number of numbers
         for i in [1,10,11,12,13,14,15,16]:
             driver.find_element(By.XPATH, f"//button//*[text()='{i}']").click()
-            time.sleep(0.1)  # Small pause to register the click
+            time.sleep(0.2)  # Small pause to register the click
 
         # Find and click the 'Submit' button
         submit_button = wait.until(
