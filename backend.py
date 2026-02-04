@@ -1,7 +1,9 @@
 # --- Import necessary libraries ---
 import streamlit as st
-import queries
 from st_supabase_connection import SupabaseConnection
+
+import queries
+import base64
 
 
 class WinningNumbers:
@@ -229,10 +231,23 @@ class WinningNumbers:
         return formatted_results, total_draws, winning_draws
 
 
-# In your Supabase connection logic
-def get_pdf_url(document):
+def get_pdf(doc, height=700):
+    # 1. Convert Supabase bytes to Base64
     conn = st.connection("supabase", type=SupabaseConnection)
-    # Generate a signed URL valid for 15 minutes
-    # This URL is a direct link to the Supabase CDN
-    return conn.client.storage.from_("Documents").create_signed_url(document, expires_in=900)
+    _, _, pdf_bytes = conn.download(
+        bucket_id="Documents",
+        source_path=doc
+    )
+    base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+
+    # 2. Use a "Blob" strategy to bypass Edge's block
+    pdf_display = f"""
+    <iframe src="data:application/pdf;base64,{base64_pdf}#toolbar=0" 
+            width="100%" 
+            height="{height}px" 
+            style="border:none;">
+    </iframe>
+    """
+
+    return pdf_display
 

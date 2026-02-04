@@ -2,7 +2,6 @@
 import streamlit as st
 import backend as sc
 import os
-import base64
 
 
 
@@ -175,7 +174,7 @@ class StreamlitFrontend:
                 # Request handled by the backend
                 if st.session_state.show_docs["agreement"] and not st.session_state.pdf_cache["agreement"]:
                     with st.spinner("Fetching..."):
-                        st.session_state.pdf_cache["agreement"] = sc.get_pdf_url(txt["user_agreement_doc"])
+                        st.session_state.pdf_cache["agreement"] = sc.get_pdf(txt["user_agreement_doc"])
 
         with col2:
             if st.button(txt["data_policy"], use_container_width=True):
@@ -186,22 +185,15 @@ class StreamlitFrontend:
                 # Request handled by the backend
                 if st.session_state.show_docs["policy"] and not st.session_state.pdf_cache["policy"]:
                     with st.spinner("Fetching..."):
-                        st.session_state.pdf_cache["policy"] = sc.get_pdf_url(txt["data_policy_doc"])
+                        st.session_state.pdf_cache["policy"] = sc.get_pdf(txt["data_policy_doc"])
 
         # Render the content if toggle is active
         if st.session_state.show_docs["agreement"]:
-            pdf_url = st.session_state.pdf_cache["agreement"]["signedURL"]
-            st.markdown(
-                f'<iframe src="{pdf_url}#toolbar=0&navpanes=0" width="100%" height="700px" style="border:none;"></iframe>',
-                unsafe_allow_html=True
-            )
+            st.markdown(st.session_state.pdf_cache["agreement"], unsafe_allow_html=True)
 
         if st.session_state.show_docs["policy"]:
-            pdf_url = st.session_state.pdf_cache["policy"]["signedURL"]
-            st.markdown(
-                f'<iframe src="{pdf_url}#toolbar=0&navpanes=0" width="100%" height="700px" style="border:none;"></iframe>',
-                unsafe_allow_html=True
-            )
+            st.markdown(st.session_state.pdf_cache["policy"], unsafe_allow_html=True)
+
         st.divider()
 
         agreed = st.checkbox(txt["disclaimer_text"])
