@@ -129,9 +129,9 @@ class StreamlitFrontend:
         """Streamlit Welcome Page for language selection."""
         st.set_page_config(page_title='Would I have won?', page_icon="🎲", layout="wide")
 
-        st.title(self.TEXT["hu"]["welcome_activity"])
-        st.title(self.TEXT["en"]["welcome_activity"])
-        st.divider()
+        # st.title(self.TEXT["hu"]["welcome_activity"])
+        # st.title(self.TEXT["en"]["welcome_activity"])
+        # st.divider()
 
         col1, col2 = st.columns(2)
         with col1:
@@ -146,7 +146,8 @@ class StreamlitFrontend:
                 st.rerun()
             st.image("hu.png", width='stretch')
             st.title(
-                "Ez egy független projekt. A Szerencsejáték Zrt. rendelkezik hivatalos számstatisztikával,"
+                "Ez egy független projekt, amely célja, hogy megtudd, hányszor nyertél volna a magyar lottón a "
+                " játék kezdete óta. A Szerencsejáték Zrt. rendelkezik hivatalos számstatisztikával,"
                 " amely elérhető a vállalat honlapján: https://bet.szerencsejatek.hu/"
             )
 
@@ -156,7 +157,8 @@ class StreamlitFrontend:
                 st.rerun()
             st.image("en.png", width='stretch')
             st.title(
-                "This is an independent project. The Szerencsejáték Zrt. publishes official statistics,"
+                "This is an independent project which shows you how many times you would have won the hungarian lottery."
+                " The Szerencsejáték Zrt. publishes official statistics,"
                 " that can be accessed at the company website: https://bet.szerencsejatek.hu/"
             )
 
