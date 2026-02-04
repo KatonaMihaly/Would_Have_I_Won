@@ -235,7 +235,6 @@ def get_pdf(document_path, height=700):
     # 1. Convert Supabase bytes to Base64
     conn = st.connection("supabase", type=SupabaseConnection)
 
-
     # 2. Use a "Blob" strategy to bypass Edge's block
     result = conn.client.storage.from_("Documents").create_signed_url(document_path, expires_in=900)
 

@@ -171,27 +171,27 @@ class StreamlitFrontend:
                 # We fetch this once so the link is ready
                 st.session_state.pdf_cache["agreement"] = sc.get_pdf(txt["user_agreement_doc"])
 
-            # 2. Render the link button
-            # This automatically opens in a new tab and avoids pop-up blockers
-            st.link_button(
-                txt["user_agreement"],
-                st.session_state.pdf_cache["agreement"],
-                use_container_width=True,
-                type="secondary"
-            )
+        # 2. Render the link button
+        # This automatically opens in a new tab and avoids pop-up blockers
+        st.link_button(
+            txt["user_agreement"],
+            st.session_state.pdf_cache["agreement"],
+            use_container_width=True,
+            type="secondary"
+        )
 
         with col2:
             # 1. Ensure the URL is in cache
             if not st.session_state.pdf_cache.get("policy"):
                 st.session_state.pdf_cache["policy"] = sc.get_pdf(txt["data_policy_doc"])
 
-            # 2. Render the link button
-            st.link_button(
-                txt["data_policy"],
-                st.session_state.pdf_cache["policy"],
-                use_container_width=True,
-                type="secondary"
-            )
+        # 2. Render the link button
+        st.link_button(
+            txt["data_policy"],
+            st.session_state.pdf_cache["policy"],
+            use_container_width=True,
+            type="secondary"
+        )
 
         st.divider()
 
