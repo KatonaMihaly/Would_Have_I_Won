@@ -244,16 +244,3 @@ def get_pdf(document_path, height=700):
         return result["signedURL"] + "#toolbar=0&navpanes=0&scrollbar=0"
     return None
 
-def display_pdf(pdf_url):
-    pdf_display = f"""
-            <div style="width:100%; height:1200px; overflow: hidden; border: 1px solid #ccc;">
-                <object data="{pdf_url}" type="application/pdf" width="100%" height="100%">
-                    <iframe src="{pdf_url}" width="100%" height="100%" style="border:none;">
-                        <p>Your browser does not support PDFs. 
-                        <a href="{pdf_url}">Download the PDF</a>.</p>
-                    </iframe>
-                </object>
-            </div>
-            """
-    st.markdown(pdf_display, unsafe_allow_html=True)
-

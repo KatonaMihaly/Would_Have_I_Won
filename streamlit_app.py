@@ -166,34 +166,32 @@ class StreamlitFrontend:
         col1, col2 = st.columns(2)
 
         with col1:
-            if st.button(txt["user_agreement"], use_container_width=True):
-                if st.session_state.show_docs["policy"]:
-                    st.session_state.show_docs["policy"] = not st.session_state.show_docs["policy"]
-                st.session_state.show_docs["agreement"] = not st.session_state.show_docs["agreement"]
+            # 1. Ensure the URL is in cache before showing the button
+            if not st.session_state.pdf_cache.get("agreement"):
+                # We fetch this once so the link is ready
+                st.session_state.pdf_cache["agreement"] = sc.get_pdf(txt["user_agreement_doc"])
 
-                # Request handled by the backend
-                if st.session_state.show_docs["agreement"] and not st.session_state.pdf_cache["agreement"]:
-                    with st.spinner("Fetching..."):
-                        st.session_state.pdf_cache["agreement"] = sc.get_pdf(txt["user_agreement_doc"])
+            # 2. Render the link button
+            # This automatically opens in a new tab and avoids pop-up blockers
+            st.link_button(
+                txt["user_agreement"],
+                st.session_state.pdf_cache["agreement"],
+                use_container_width=True,
+                type="secondary"
+            )
 
         with col2:
-            if st.button(txt["data_policy"], use_container_width=True):
-                if st.session_state.show_docs["agreement"]:
-                    st.session_state.show_docs["agreement"] = not st.session_state.show_docs["agreement"]
-                st.session_state.show_docs["policy"] = not st.session_state.show_docs["policy"]
+            # 1. Ensure the URL is in cache
+            if not st.session_state.pdf_cache.get("policy"):
+                st.session_state.pdf_cache["policy"] = sc.get_pdf(txt["data_policy_doc"])
 
-                # Request handled by the backend
-                if st.session_state.show_docs["policy"] and not st.session_state.pdf_cache["policy"]:
-                    with st.spinner("Fetching..."):
-                        st.session_state.pdf_cache["policy"] = sc.get_pdf(txt["data_policy_doc"])
-
-        # Render the content if toggle is active
-        if st.session_state.show_docs["agreement"]:
-            sc.display_pdf(st.session_state.pdf_cache["agreement"])
-
-        if st.session_state.show_docs["policy"]:
-            sc.display_pdf(st.session_state.pdf_cache["policy"])
-
+            # 2. Render the link button
+            st.link_button(
+                txt["data_policy"],
+                st.session_state.pdf_cache["policy"],
+                use_container_width=True,
+                type="secondary"
+            )
 
         st.divider()
 
