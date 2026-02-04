@@ -229,14 +229,10 @@ class WinningNumbers:
         return formatted_results, total_draws, winning_draws
 
 
-def get_pdf(document):
-    """
-    Connects to Supabase Storage and retrieves PDF bytes.
-    """
-    # Initialize the storage connection
+# In your Supabase connection logic
+def get_pdf_url(document):
     conn = st.connection("supabase", type=SupabaseConnection)
+    # Generate a signed URL valid for 15 minutes
+    # This URL is a direct link to the Supabase CDN
+    return conn.client.storage.from_("Documents").create_signed_url(document, expires_in=900)
 
-    # Download from the 'Documents' bucket
-    _, _, content = conn.download(bucket_id="Documents", source_path=document)
-
-    return content

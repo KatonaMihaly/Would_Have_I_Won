@@ -116,16 +116,6 @@ class StreamlitFrontend:
 
     #  Helper Methods
 
-    def display_pdf_bytes(self, pdf_bytes, height=700):
-        """Converts PDF bytes to a base64 string and displays it in an iframe."""
-        base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
-        pdf_display = (
-            f'<iframe src="data:application/pdf;base64,{base64_pdf}" '
-            f'width="100%" height="{height}px" type="application/pdf"></iframe>'
-        )
-        st.markdown(pdf_display, unsafe_allow_html=True)
-
-
     def _clear_session_keys(self, keys_to_clear):
         """
         A helper function to remove a list of keys from session_state.
@@ -185,7 +175,7 @@ class StreamlitFrontend:
                 # Request handled by the backend
                 if st.session_state.show_docs["agreement"] and not st.session_state.pdf_cache["agreement"]:
                     with st.spinner("Fetching..."):
-                        st.session_state.pdf_cache["agreement"] = sc.get_pdf(txt["user_agreement_doc"])
+                        st.session_state.pdf_cache["agreement"] = sc.get_pdf_url(txt["user_agreement_doc"])
 
         with col2:
             if st.button(txt["data_policy"], use_container_width=True):
@@ -196,15 +186,22 @@ class StreamlitFrontend:
                 # Request handled by the backend
                 if st.session_state.show_docs["policy"] and not st.session_state.pdf_cache["policy"]:
                     with st.spinner("Fetching..."):
-                        st.session_state.pdf_cache["policy"] = sc.get_pdf(txt["data_policy_doc"])
+                        st.session_state.pdf_cache["policy"] = sc.get_pdf_url(txt["data_policy_doc"])
 
         # Render the content if toggle is active
         if st.session_state.show_docs["agreement"]:
-            self.display_pdf_bytes(st.session_state.pdf_cache["agreement"], height=700)
+            pdf_url = st.session_state.pdf_cache["agreement"]["signedURL"]
+            st.markdown(
+                f'<iframe src="{pdf_url}#toolbar=0&navpanes=0" width="100%" height="700px" style="border:none;"></iframe>',
+                unsafe_allow_html=True
+            )
 
         if st.session_state.show_docs["policy"]:
-            self.display_pdf_bytes(st.session_state.pdf_cache["policy"], height=700)
-
+            pdf_url = st.session_state.pdf_cache["policy"]["signedURL"]
+            st.markdown(
+                f'<iframe src="{pdf_url}#toolbar=0&navpanes=0" width="100%" height="700px" style="border:none;"></iframe>',
+                unsafe_allow_html=True
+            )
         st.divider()
 
         agreed = st.checkbox(txt["disclaimer_text"])
