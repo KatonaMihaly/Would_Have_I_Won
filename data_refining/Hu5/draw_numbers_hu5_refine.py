@@ -34,7 +34,7 @@ def to_sql(df):
         sql = f"('{date}', '{lottery}', ARRAY[{','.join(map(str, numbers))}]),"
         lines.append(sql)
 
-    with open('../SQL_commands/draw_numbers_hu5_SQL.txt', 'w') as f:
+    with open('../SQL_commands/draw_numbers_hu5_SQL.sql', 'w') as f:
         f.write('\n'.join(lines))
 
 if __name__ == '__main__':

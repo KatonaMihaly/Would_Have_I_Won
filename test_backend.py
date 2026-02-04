@@ -328,7 +328,7 @@ class TestWinningNumbersQueries(unittest.TestCase):
         self.assertEqual(results, expected_results)
         self.assertEqual(total_draws, 100)
 
-        mock_st.connection.assert_called_once_with("postgresql", type="sql")
+        mock_st.connection.assert_called_once_with("supa_db", type="sql")
         self.assertEqual(mock_conn.query.call_count, 2)
         mock_conn.query.assert_any_call("fake_match_query", params={"p": 1}, ttl="1m")
         mock_conn.query.assert_any_call("fake_total_query", params={"p": 2}, ttl="1m")

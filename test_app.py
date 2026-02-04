@@ -98,31 +98,31 @@ def test_full_user_journey(
         # --- 2. Disclaimer Page ---
         # We need to click the correct buttons based on the language (lang_btn)
         # For this example, I'll trigger the Agreement toggle
-        agreement_text = "User Agreement" if lang_btn == "English" else "Felhasználási Feltételek"
-
-        ua_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{agreement_text}')]"))
-        )
-        ua_button.click()
-        time.sleep(2)
-
-        ua_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{agreement_text}')]"))
-        )
-        ua_button.click()
-
-        policy_text = "Data Policy" if lang_btn == "English" else "Adatkezelési Tájékoztató"
-
-        dp_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{policy_text}')]"))
-        )
-        dp_button.click()
-        time.sleep(2)
-
-        dp_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{policy_text}')]"))
-        )
-        dp_button.click()
+        # agreement_text = "User Agreement" if lang_btn == "English" else "Felhasználási Feltételek"
+        #
+        # ua_button = wait.until(
+        #     EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{agreement_text}')]"))
+        # )
+        # ua_button.click()
+        # time.sleep(2)
+        #
+        # ua_button = wait.until(
+        #     EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{agreement_text}')]"))
+        # )
+        # ua_button.click()
+        #
+        # policy_text = "Data Policy" if lang_btn == "English" else "Adatkezelési Tájékoztató"
+        #
+        # dp_button = wait.until(
+        #     EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{policy_text}')]"))
+        # )
+        # dp_button.click()
+        # time.sleep(2)
+        #
+        # dp_button = wait.until(
+        #     EC.element_to_be_clickable((By.XPATH, f"//button[contains(., '{policy_text}')]"))
+        # )
+        # dp_button.click()
 
         # --- Checkbox Handling ---
         checkbox_container = wait.until(

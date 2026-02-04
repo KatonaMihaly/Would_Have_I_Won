@@ -34,10 +34,10 @@ def to_sql(df):
         sql = f"('{date}', '{lottery}', ARRAY[{','.join(map(str, numbers))}]),"
         lines.append(sql)
 
-    with open('../SQL_commands/draw_numbers_hu7b_SQL.txt', 'w') as f:
+    with open('../SQL_commands/draw_numbers_hu7a_SQL.sql', 'w') as f:
         f.write('\n'.join(lines))
 
 if __name__ == '__main__':
-    fixed_df = complete_draws('draw_numbers_hu7b.csv')
+    fixed_df = complete_draws('draw_numbers_hu7a.csv')
     del fixed_df['date']
     to_sql(fixed_df)

@@ -48,7 +48,7 @@ class StreamlitFrontend:
             "matches_manual_col": "⭐ Matches",
             "success_hu5_hu6": "🎉 You would have won in {wins} draws out of {length} draws since the start of the lottery! 🎉",
             "success_hu7": "🎉 You would have won in {wins} draws out of {length} draws since the start of the lottery! 🎉",
-            "last_update": "🔄 Last database update: 02/11/2025",
+            "last_update": "🔄 Last database update: 04/02/2026",
             "limit": "*results are limited to 20 rows for efficient display."
         },
         "hu": {
@@ -85,7 +85,7 @@ class StreamlitFrontend:
             "matches_manual_col": "⭐ Találatok száma",
             "success_hu5_hu6": "🎉 Az eddigi {length} húzásból {wins} húzáson lett volna találatod! 🎉",
             "success_hu7": "🎉 Az eddigi {length} húzásból {wins} húzáson lett volna találatod! 🎉",
-            "last_update": "🔄 Adatbázis utolsó frissítése: 2025.11.02.",
+            "last_update": "🔄 Adatbázis utolsó frissítése: 2026.02.04.",
             "limit": "*az eredmények 20 sorra vannak korlátozva."
         }
     }
@@ -145,12 +145,20 @@ class StreamlitFrontend:
                 st.session_state["language"] = "hu"
                 st.rerun()
             st.image("hu.png", width='stretch')
+            st.title(
+                "Ez egy független projekt. A Szerencsejáték Zrt. rendelkezik hivatalos számstatisztikával,"
+                " amely elérhető a vállalat honlapján: https://bet.szerencsejatek.hu/"
+            )
 
         with col2:
             if st.button("English", width='stretch', type="secondary"):
                 st.session_state["language"] = "en"
                 st.rerun()
             st.image("en.png", width='stretch')
+            st.title(
+                "This is an independent project. The Szerencsejáték Zrt. publishes official statistics,"
+                " that can be accessed at the company website: https://bet.szerencsejatek.hu/"
+            )
 
     def _disclaimer_page(self, txt):
 
