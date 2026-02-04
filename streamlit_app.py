@@ -189,10 +189,11 @@ class StreamlitFrontend:
 
         # Render the content if toggle is active
         if st.session_state.show_docs["agreement"]:
-            st.markdown(st.session_state.pdf_cache["agreement"], unsafe_allow_html=True)
+            sc.display_pdf(st.session_state.pdf_cache["agreement"])
 
         if st.session_state.show_docs["policy"]:
-            st.markdown(st.session_state.pdf_cache["policy"], unsafe_allow_html=True)
+            sc.display_pdf(st.session_state.pdf_cache["policy"])
+
 
         st.divider()
 

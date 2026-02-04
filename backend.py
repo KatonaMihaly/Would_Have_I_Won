@@ -231,23 +231,29 @@ class WinningNumbers:
         return formatted_results, total_draws, winning_draws
 
 
-def get_pdf(doc, height=700):
+def get_pdf(document_path, height=700):
     # 1. Convert Supabase bytes to Base64
     conn = st.connection("supabase", type=SupabaseConnection)
-    _, _, pdf_bytes = conn.download(
-        bucket_id="Documents",
-        source_path=doc
-    )
-    base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+
 
     # 2. Use a "Blob" strategy to bypass Edge's block
-    pdf_display = f"""
-    <iframe src="data:application/pdf;base64,{base64_pdf}#toolbar=0" 
-            width="100%" 
-            height="{height}px" 
-            style="border:none;">
-    </iframe>
-    """
+    result = conn.client.storage.from_("Documents").create_signed_url(document_path, expires_in=900)
 
-    return pdf_display
+    if "signedURL" in result:
+        # Append parameters to the URL to try and hide the Edge toolbar
+        return result["signedURL"] + "#toolbar=0&navpanes=0&scrollbar=0"
+    return None
+
+def display_pdf(pdf_url):
+    pdf_display = f"""
+            <div style="width:100%; height:1200px; overflow: hidden; border: 1px solid #ccc;">
+                <object data="{pdf_url}" type="application/pdf" width="100%" height="100%">
+                    <iframe src="{pdf_url}" width="100%" height="100%" style="border:none;">
+                        <p>Your browser does not support PDFs. 
+                        <a href="{pdf_url}">Download the PDF</a>.</p>
+                    </iframe>
+                </object>
+            </div>
+            """
+    st.markdown(pdf_display, unsafe_allow_html=True)
 
