@@ -2,6 +2,7 @@
 import streamlit as st
 import backend as sc
 import os
+import base64
 
 
 
@@ -113,7 +114,17 @@ class StreamlitFrontend:
         }
     }
 
-    #  Helper Methods 
+    #  Helper Methods
+
+    def display_pdf_bytes(self, pdf_bytes, height=700):
+        """Converts PDF bytes to a base64 string and displays it in an iframe."""
+        base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+        pdf_display = (
+            f'<iframe src="data:application/pdf;base64,{base64_pdf}" '
+            f'width="100%" height="{height}px" type="application/pdf"></iframe>'
+        )
+        st.markdown(pdf_display, unsafe_allow_html=True)
+
 
     def _clear_session_keys(self, keys_to_clear):
         """
@@ -189,10 +200,10 @@ class StreamlitFrontend:
 
         # Render the content if toggle is active
         if st.session_state.show_docs["agreement"]:
-            st.pdf(st.session_state.pdf_cache["agreement"], height=700)
+            self.display_pdf_bytes(st.session_state.pdf_cache["agreement"], height=700)
 
         if st.session_state.show_docs["policy"]:
-            st.pdf(st.session_state.pdf_cache["policy"], height=700)
+            self.display_pdf_bytes(st.session_state.pdf_cache["policy"], height=700)
 
         st.divider()
 
