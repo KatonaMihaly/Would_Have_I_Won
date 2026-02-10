@@ -165,10 +165,8 @@ class StreamlitFrontend:
     def _disclaimer_page(self, txt):
 
         # Initialize session state for UI toggles and PDF memory caching
-        if "pdf_cache" not in st.session_state:
-            st.session_state.pdf_cache = {"agreement": None, "policy": None}
-        if "show_docs" not in st.session_state:
-            st.session_state.show_docs = {"agreement": False, "policy": False}
+        st.session_state.pdf_cache = {"agreement": None, "policy": None}
+        st.session_state.show_docs = {"agreement": False, "policy": False}
 
         st.set_page_config(page_title='Would I have won?', page_icon="🎲", layout="wide")
         st.title(txt["disclaimer_title"])

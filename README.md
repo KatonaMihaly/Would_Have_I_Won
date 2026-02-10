@@ -119,38 +119,23 @@ The project is structured into frontend, backend logic, configuration, and testi
 ├── backend.py                # Core application logic and database querying
 ├── streamlit_app.py          # Streamlit frontend UI and session state management
 ├── requirements.txt          # Python dependencies
-├── disclaimer_en.txt         # English disclaimer text
-├── disclaimer_hu.txt         # Hungarian disclaimer text
+├── queries.py                # SQL queries
 ├── test_backend.py           # Unit tests for the backend logic
 └── test_app.py               # End-to-end (E2E) tests using Selenium
 ```
 
 ## 📋 File Descriptions
 
-| File Name         | Purpose                                                                                                                                                                                                                                                                    |
-|:------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| streamlit_app.py  | Frontend (UI & Routing). Contains the StreamlitFrontend class, which manages the application's multilingual text, dynamic number pickers, session state navigation (Welcome, Disclaimer, Selector, Picker, Results), and displays the final data fetched from the backend. |
-| backend.py        | Backend (Logic & Data). Contains the WinningNumbers class. It handles all critical logic, including input validation (lottery ID, number count, number range), SQL query construction for the lotteries, and executing database operations via st.connection.              |
-| requirements.txt  | Dependencies. Lists all necessary Python packages, including streamlit, psycopg2-binary (PostgreSQL adapter), and sqlalchemy.                                                                                                                                              |
-| disclaimer_en.txt | Content. The English text for the user agreement/disclaimer.                                                                                                                                                                                                               |
-| disclaimer_hu.txt | Content. The Hungarian text for the user agreement/disclaimer.                                                                                                                                                                                                             |
-| test_backed.py    | Unit Tests. Uses unittest and unittest.mock to verify the validation methods (_check_validity_lottery, _check_validity_numbers, _check_validity_match_count) and data interaction logic (check_lottery_numbers and _run_db_queries).                                       |
-| test_app.py       | E2E Tests. Uses pytest and selenium with Edge WebDriver to simulate a full user journey through the Streamlit app, checking that pages load and buttons correctly transition between states across both English and Hungarian languages.                                   |
+| File Name        | Purpose                                                                                                                                                                                                                                                                    |
+|:-----------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| streamlit_app.py | Frontend (UI & Routing). Contains the StreamlitFrontend class, which manages the application's multilingual text, dynamic number pickers, session state navigation (Welcome, Disclaimer, Selector, Picker, Results), and displays the final data fetched from the backend. |
+| backend.py       | Backend (Logic & Data). Contains the WinningNumbers class. It handles all critical logic, including input validation (lottery ID, number count, number range), SQL query construction for the lotteries, and executing database operations via st.connection.              |
+| requirements.txt | Dependencies. Lists all necessary Python packages, including streamlit, psycopg2-binary (PostgreSQL adapter), and sqlalchemy.                                                                                                                                              |
+| queries.py       | SQL queries. Contains all the necessary SQL queries, for cleaner backend.                                                                                                                                                                                                  |
+| test_backed.py   | Unit Tests. Uses unittest and unittest.mock to verify the validation methods (_check_validity_lottery, _check_validity_numbers, _check_validity_match_count) and data interaction logic (check_lottery_numbers and _run_db_queries).                                       |
+| test_app.py      | E2E Tests. Uses pytest and selenium with Edge WebDriver to simulate a full user journey through the Streamlit app, checking that pages load and buttons correctly transition between states across both English and Hungarian languages.                                   |
 
 ## ⚙️ Local Setup of 🎯 Would I have won? App
-
-### <span style="color: red;">IMPORTANT NOTICE: To comply with the strict gambling-related laws of Hungary a disclaimer was created. If you host the application yourself, then modify the documents in English and in Hungarian too. The developer (Mihály Katona) does not guarantee its completeness! See [LICENSE](LICENSE)! <span>
-
-- Change the [disclaimer_en.txt](disclaimer_en.txt) everywhere:
-  - Katona Mihály --> To your own name.
-  - mihaly.katona@outlook.hu --> To your own email address.
-
-
-- Change the [disclaimer_hu.txt](disclaimer_hu.txt)
-  - Katona Mihály --> To your own name.
-  - mihaly.katona@outlook.hu --> To your own email address.
-
-Follow these steps to get the 🎯 Would I have won? App running locally.
 
 ### 1. Prerequisites
 
@@ -210,32 +195,22 @@ Execute the tests:
 # ☁️ Host on Streamlit Community Cloud and Google Cloud SQL
 
 - Fork the repository: https://github.com/KatonaMihaly/did-i-win-the-lottery.git
-
-### <span style="color: red;">IMPORTANT NOTICE: To comply with the strict gambling-related laws of Hungary a disclaimer was created. If you host the application yourself, then modify the documents in English and in Hungarian too. The developer (Mihály Katona) does not guarantee its completeness! See [LICENSE](LICENSE)! <span>
-
-- Change the [disclaimer_en.txt](disclaimer_en.txt):
-  - Katona Mihály --> To your own name.
-  - mihaly.katona@outlook.hu --> To your own email address.
-
-
-- Change the [disclaimer_hu.txt](disclaimer_hu.txt)
-  - Katona Mihály --> To your own name.
-  - mihaly.katona@outlook.hu --> To your own email address.
-
-
+- 
 - Go to Streamlit Community Cloud: https://share.streamlit.io/
 - Choose "Deploy a public app from Github" and follow the process
 - Click "Advanced settings" and paste the content of your secrets.toml to secrets.
 
-If you host your database on Google Cloud SQL, then change your secrets to:
-- dialect = "postgresql"
-- host = **public IP of the Google Cloud SQL database**
-- port = "5432"
-- database = **name of the database on Google Cloud SQL**
-- username = **username created in Google Cloud SQL for the database**
-- password = **password for the created username in Google Cloud SQL**
+If you host your database on Supabase, then change your secrets to:
 
-Do not forget to add Streamlits public IPs to the allowed networks in your Google Cloud SQL database from https://docs.streamlit.io/deploy/streamlit-community-cloud/status
+[connections.supa_db]
+
+url = "postgresql://postgres.[your Supabase project ID]:[your DB password]@[your pooler ID].pooler.supabase.com:6543/postgres"
+
+[connections.supabase]
+
+SUPABASE_URL = "https://[your Supabase project ID].supabase.co"
+
+SUPABASE_KEY = "[your anon key from Supabase]"
 
 # ⬇️ Download public Hungarian lottery data
 - Go to https://www.szerencsejatek.hu/
