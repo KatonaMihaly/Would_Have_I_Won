@@ -192,10 +192,9 @@ Execute the tests:
 - unit test: ```python -m unittest test_backend.py```
 - end-to-end test: ```pytest test_app.py```
 
-# ☁️ Host on Streamlit Community Cloud and Google Cloud SQL
+# ☁️ Host on Streamlit Community Cloud and Supabase
 
 - Fork the repository: https://github.com/KatonaMihaly/did-i-win-the-lottery.git
-- 
 - Go to Streamlit Community Cloud: https://share.streamlit.io/
 - Choose "Deploy a public app from Github" and follow the process
 - Click "Advanced settings" and paste the content of your secrets.toml to secrets.
